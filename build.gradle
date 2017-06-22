@@ -19,6 +19,9 @@ allprojects {
         jcenter()
         mavenCentral()
         maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "http://dl.bintray.com/kategory/maven" }
+        maven { url 'https://kotlin.bintray.com/kotlinx' }
+        maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
     }
 }
 
