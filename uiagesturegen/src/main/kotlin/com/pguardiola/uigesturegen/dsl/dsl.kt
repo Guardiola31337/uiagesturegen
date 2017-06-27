@@ -23,7 +23,7 @@ class SafeInterpreter<F>(val M: MonadError<F, Throwable>, val device: UiDevice) 
     override fun <A> invoke(fa: HK<GestureDSL.F, A>): HK<F, A> {
         val g = fa.ev()
         return when (g) {
-            is GestureDSL.PressHome -> M.pure(device.pressHome())
+            is GestureDSL.PressHome -> M.pure(device.pressHome()) // all M.pure should be changed to M.catch once that is available in Kategory
             is GestureDSL.Wait<*> -> M.pure(device.wait(g.condition, g.timeout))
             is GestureDSL.FindObject -> M.pure(device.findObject(g.selector))
             is GestureDSL.WithDevice<*> -> M.pure(g.f(device))
