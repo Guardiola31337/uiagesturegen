@@ -13,6 +13,7 @@ sealed class GestureDSL<out A> : HK<GestureDSL.F, A> {
     data class Wait<R>(val condition: SearchCondition<R>, val timeout: Long) : GestureDSL<R>()
     data class FindObject(val selector: UiSelector) : GestureDSL<UiObject>()
     data class WithDevice<out A>(val f: (UiDevice) -> A) : GestureDSL<A>()
+    object PressMenu : GestureDSL<Boolean>()
 
     companion object : FreeMonad<GestureDSL.F>
 
@@ -27,6 +28,7 @@ class SafeInterpreter<F>(val M: MonadError<F, Throwable>, val device: UiDevice) 
             is GestureDSL.Wait<*> -> M.pure(device.wait(g.condition, g.timeout))
             is GestureDSL.FindObject -> M.pure(device.findObject(g.selector))
             is GestureDSL.WithDevice<*> -> M.pure(g.f(device))
+            is GestureDSL.PressMenu -> M.pure(device.pressMenu())
         } as HK<F, A>
     }
 }
@@ -51,6 +53,7 @@ fun pressHome(): DSLAction<Boolean> = Free.liftF(GestureDSL.PressHome)
 fun <R> wait(condition: SearchCondition<R>, timeout: Long): DSLAction<R> = Free.liftF(GestureDSL.Wait(condition, timeout))
 fun findObject(selector: UiSelector): DSLAction<UiObject> = Free.liftF(GestureDSL.FindObject(selector))
 fun <A> withDevice(f: (UiDevice) -> A): DSLAction<A> = Free.liftF(GestureDSL.WithDevice(f))
+fun pressMenu(): DSLAction<Boolean> = Free.liftF(GestureDSL.PressMenu)
 
 fun <A> Free<GestureDSL.F, A>.run(device: UiDevice): Try<A> =
         this.foldMap(SafeInterpreter(Try, device), Try).ev()
