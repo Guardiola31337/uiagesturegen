@@ -11,9 +11,10 @@ object GestureDSLExamples {
     /**
      * compose multiple actions independently regardless of return types
      */
-    fun independentActionsWorkflow(): DSLAction<Tuple4<Boolean, UiObject, UiObject, UiObject>> =
+    fun independentActionsWorkflow(): DSLAction<Tuple5<Boolean, Boolean, UiObject, UiObject, UiObject>> =
             GestureDSL.tupled(
                     pressHome(),
+                    pressMenu(),
                     findObject(UiSelector().description("1")),
                     findObject(UiSelector().description("2")),
                     findObject(UiSelector().description("3"))).ev()
