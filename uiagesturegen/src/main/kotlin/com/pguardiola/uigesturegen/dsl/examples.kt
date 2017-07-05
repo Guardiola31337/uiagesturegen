@@ -61,4 +61,14 @@ object GestureDSLExamples {
         program.run(UiDevice.getInstance()).recover { e -> throw e }
     }
 
+    fun clickExamples(): DSLAction<List<Boolean>> = listOf(
+            findObject(UiSelector().description("1")),
+            findObject(UiSelector().description("2"))).click()
+
+    fun doubleTapExamples(): DSLAction<List<Boolean>> = listOf(
+            findObject(UiSelector().description("1")),
+            findObject(UiSelector().description("2"))).doubleTap()
+
+    fun singleClick(): DSLAction<Boolean> = findObject(UiSelector().description("1")).click()
+
 }
