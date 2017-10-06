@@ -55,6 +55,21 @@ fun findObject(selector: UiSelector): DSLAction<UiObject> = Free.liftF(GestureDS
 fun <A> withDevice(f: (UiDevice) -> A): DSLAction<A> = Free.liftF(GestureDSL.WithDevice(f))
 fun pressMenu(): DSLAction<Boolean> = Free.liftF(GestureDSL.PressMenu)
 
+fun DSLAction<UiObject>.click(): DSLAction<Boolean> =
+        this.map { it.click() }
+
+fun List<DSLAction<UiObject>>.click(): DSLAction<List<Boolean>> =
+        this.traverse({ it.click() }, GestureDSL).ev()
+
+fun DSLAction<UiObject>.doubleTap(): DSLAction<Boolean> =
+        click().flatMap { firstClick ->
+            if (firstClick) click()
+            else GestureDSL.pure(false)
+        }
+
+fun List<DSLAction<UiObject>>.doubleTap(): DSLAction<List<Boolean>> =
+        this.traverse({ it.doubleTap() }, GestureDSL).ev()
+
 fun <A> Free<GestureDSL.F, A>.run(device: UiDevice): Try<A> =
         this.foldMap(SafeInterpreter(Try, device), Try).ev()
 
