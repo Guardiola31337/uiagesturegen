@@ -3,13 +3,13 @@ package com.pguardiola.uigesturegen.dsl
 import android.graphics.Point
 import android.view.MotionEvent
 import kategory.Free
-import kategory.FreeMonad
-import kategory.HK
+import kategory.FreeMonadInstance
+import kategory.higherkind
 
 
-typealias ActionDSL<A> = Free<GesturesDSL.F, A>
+typealias ActionDSL<A> = Free<GesturesDSLHK, A>
 
-sealed class GesturesDSL<out A> : HK<GesturesDSL.F, A> {
+@higherkind sealed class GesturesDSL<A> : GesturesDSLKind<A> {
 
     class F private constructor()
 
@@ -23,8 +23,7 @@ sealed class GesturesDSL<out A> : HK<GesturesDSL.F, A> {
     data class MultiTouch(val touches: List<Array<MotionEvent.PointerCoords>>) : ActionDSL<Boolean>()
     data class TwoPointer(val firstStart: Point, val firstEnd: Point, val secondStart: Point, val secondEnd: Point, val steps: Int) : ActionDSL<Boolean>()
 
-    companion object : FreeMonad<F>
-
+    companion object : FreeMonadInstance<GesturesDSLHK>
 }
 
 fun click(): DSLAction<Boolean> = Free.liftF(GesturesDSL.Click)

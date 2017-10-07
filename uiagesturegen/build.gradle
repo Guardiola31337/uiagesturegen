@@ -1,7 +1,9 @@
 buildscript {
-    ext.kotlinVersion = '1.1.3'
+    ext.kotlinVersion = '1.1.51'
+    ext.kategoryVersion = '0.3.10'
 
     repositories {
+        jcenter()
         mavenCentral()
     }
 
@@ -14,6 +16,8 @@ repositories {
     mavenCentral()
 }
 
+apply plugin: 'kotlin-kapt'
+apply from: rootProject.file('gradle/generated-kotlin-sources.gradle')
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
@@ -39,16 +43,20 @@ android {
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         main.java.srcDirs += 'src/main/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
+        debug.java.srcDirs += 'build/generated/source/kaptKotlin/debug'
+        release.java.srcDirs += 'build/generated/source/kaptKotlin/release'
     }
 }
 
 dependencies {
+    kapt "io.kategory:kategory-annotations-processor:$kategoryVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile "io.kategory:kategory-annotations:$kategoryVersion"
+    compile "io.kategory:kategory:$kategoryVersion"
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+    testCompile 'junit:junit:4.12'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    testCompile 'junit:junit:4.12'
-    compile 'io.kategory:kategory:0.3.3'
 }
