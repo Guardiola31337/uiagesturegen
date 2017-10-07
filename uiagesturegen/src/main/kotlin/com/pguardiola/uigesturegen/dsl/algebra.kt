@@ -14,8 +14,8 @@ sealed class GesturesDSL<out A> : HK<GesturesDSL.F, A> {
     class F private constructor()
 
     object Click : ActionDSL<Boolean>()
-    object PinchIn : ActionDSL<Boolean>()
-    object PinchOut : ActionDSL<Boolean>()
+    data class PinchIn(val percent: Int, val steps: Int) : ActionDSL<Boolean>()
+    data class PinchOut(val percent: Int, val steps: Int) : ActionDSL<Boolean>()
     data class SwipeLeft(val steps: Int) : ActionDSL<Boolean>()
     data class SwipeRight(val steps: Int) : ActionDSL<Boolean>()
     data class SwipeUp(val steps: Int) : ActionDSL<Boolean>()
@@ -28,8 +28,8 @@ sealed class GesturesDSL<out A> : HK<GesturesDSL.F, A> {
 }
 
 fun click(): DSLAction<Boolean> = Free.liftF(GesturesDSL.Click)
-fun pinchIn(): DSLAction<Boolean> = Free.liftF(GesturesDSL.PinchIn)
-fun pinchOut(): DSLAction<Boolean> = Free.liftF(GesturesDSL.PinchOut)
+fun pinchIn(percent: Int, steps: Int): DSLAction<Boolean> = Free.liftF(GesturesDSL.PinchIn(percent, steps))
+fun pinchOut(percent: Int, steps: Int): DSLAction<Boolean> = Free.liftF(GesturesDSL.PinchOut(percent, steps))
 fun swipeLeft(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeLeft(steps))
 fun swipeRight(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeRight(steps))
 fun swipeUp(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeUp(steps))
