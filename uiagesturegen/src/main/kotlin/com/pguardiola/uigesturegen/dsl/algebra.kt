@@ -20,7 +20,7 @@ sealed class GesturesDSL<out A> : HK<GesturesDSL.F, A> {
     data class SwipeRight(val steps: Int) : ActionDSL<Boolean>()
     data class SwipeUp(val steps: Int) : ActionDSL<Boolean>()
     data class SwipeDown(val steps: Int) : ActionDSL<Boolean>()
-    data class MultiTouch(vararg touches: Array<MotionEvent.PointerCoords>) : ActionDSL<Boolean>()
+    data class MultiTouch(val touches: List<Array<MotionEvent.PointerCoords>>) : ActionDSL<Boolean>()
     data class TwoPointer(val firstStart: Point, val firstEnd: Point, val secondStart: Point, val secondEnd: Point, val steps: Int) : ActionDSL<Boolean>()
 
     companion object : FreeMonad<F>
@@ -34,5 +34,5 @@ fun swipeLeft(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeLeft
 fun swipeRight(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeRight(steps))
 fun swipeUp(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeUp(steps))
 fun swipeDown(steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.SwipeDown(steps))
-fun multiTouch(vararg touches: Array<MotionEvent.PointerCoords>): ActionDSL<Boolean> = Free.liftF(GesturesDSL.MultiTouch(*touches))
+fun multiTouch(touches: List<Array<MotionEvent.PointerCoords>>): ActionDSL<Boolean> = Free.liftF(GesturesDSL.MultiTouch(touches))
 fun twoPointer(firstStart: Point, firstEnd: Point, secondStart: Point, secondEnd: Point, steps: Int): ActionDSL<Boolean> = Free.liftF(GesturesDSL.TwoPointer(firstStart, secondStart, firstEnd, secondEnd, steps))

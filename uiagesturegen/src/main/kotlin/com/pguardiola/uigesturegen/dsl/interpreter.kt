@@ -40,6 +40,6 @@ fun swipeUpImpl(view: UiObject, steps: Int): Boolean = view.swipeUp(steps)
 
 fun swipeDownImpl(view: UiObject, steps: Int): Boolean = view.swipeDown(steps)
 
-fun multiTouchImpl(view: UiObject, vararg touches: Array<MotionEvent.PointerCoords>): Boolean = view.performMultiPointerGesture(*touches)
+fun multiTouchImpl(view: UiObject, touches: List<Array<MotionEvent.PointerCoords>>): Boolean = view.performMultiPointerGesture(*(touches.toTypedArray()))
 
 fun twoPointerImpl(view: UiObject, firstStart: Point, firstEnd: Point, secondStart: Point, secondEnd: Point, steps: Int): Boolean = view.performTwoPointerGesture(firstStart, secondStart, firstEnd, secondEnd, steps)
