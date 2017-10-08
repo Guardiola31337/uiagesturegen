@@ -3,28 +3,27 @@ package com.pguardiola.uigesturegen.dsl
 import android.graphics.Point
 import android.support.test.uiautomator.UiObject
 import android.view.MotionEvent
-import kategory.FunctionK
-import kategory.HK
-import kategory.MonadError
+import kategory.*
 
 
 @Suppress("UNCHECKED_CAST")
-class SafeInterpreter<F>(val M: MonadError<F, Throwable>, val view: UiObject) : FunctionK<GesturesDSL.F, F> {
-    override fun <A> invoke(fa: HK<GestureDSL.F, A>): HK<F, A> {
-        val g = fa.ev()
-        return when (g) {
-            is GesturesDSL.Click -> M.pure(clickImpl(view)) // all M.pure should be changed to M.catch using the new version o Kategory
-            is GesturesDSL.PinchIn -> M.pure(pinchInImpl(view, g.percent, g.steps))
-            is GesturesDSL.PinchOut -> M.pure(pinchOutImpl(view, g.percent, g.steps))
-            is GesturesDSL.SwipeLeft -> M.pure(swipeLeftImpl(view, g.steps))
-            is GesturesDSL.SwipeRight -> M.pure(swipeRightImpl(view, g.steps))
-            is GesturesDSL.SwipeUp -> M.pure(swipeUpImpl(view, g.steps))
-            is GesturesDSL.SwipeDown -> M.pure(swipeDownImpl(view, g.steps))
-            is GesturesDSL.MultiTouch -> M.pure(multiTouchImpl(view, g.touches))
-            is GesturesDSL.TwoPointer -> M.pure(twoPointerImpl(view, g.firstStart, g.firstEnd, g.secondStart, g.secondEnd, g.steps))
-        } as HK<F, A>
+inline fun <reified F> safeInterpreter(ME: MonadError<F, Throwable>, view: UiObject) : FunctionK<GesturesDSLHK, F> =
+    object : FunctionK<GesturesDSLHK, F> {
+        override fun <A> invoke(fa: HK<GesturesDSLHK, A>): HK<F, A> {
+            val g = fa.ev()
+            return when (g) {
+                is GesturesDSL.Click -> ME.catch({ clickImpl(view) })
+                is GesturesDSL.PinchIn -> ME.catch({ pinchInImpl(view, g.percent, g.steps) })
+                is GesturesDSL.PinchOut -> ME.catch({ pinchOutImpl(view, g.percent, g.steps) })
+                is GesturesDSL.SwipeLeft -> ME.catch({ swipeLeftImpl(view, g.steps) })
+                is GesturesDSL.SwipeRight -> ME.catch({ swipeRightImpl(view, g.steps) })
+                is GesturesDSL.SwipeUp -> ME.catch({ swipeUpImpl(view, g.steps) })
+                is GesturesDSL.SwipeDown -> ME.catch({ swipeDownImpl(view, g.steps) })
+                is GesturesDSL.MultiTouch -> ME.catch({ multiTouchImpl(view, g.touches) })
+                is GesturesDSL.TwoPointer -> ME.catch({ twoPointerImpl(view, g.firstStart, g.firstEnd, g.secondStart, g.secondEnd, g.steps) })
+            } as HK<F, A>
+        }
     }
-}
 
 fun clickImpl(view: UiObject): Boolean = view.click()
 
