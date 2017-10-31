@@ -20,14 +20,18 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.test.InstrumentationRegistry
 import android.support.test.uiautomator.*
-import android.util.Log
-import android.widget.Toast
+import android.view.MotionEvent
 import com.pguardiola.uigesturegen.dsl.*
-import kategory.*
+import kategory.NonEmptyList
+import kategory.Validated
+import kategory.map
+import kategory.tupled
 import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.notNullValue
-import org.junit.Assert.*
+import org.junit.Assert.assertThat
+import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class StuffTest {
@@ -39,7 +43,8 @@ class StuffTest {
 
     lateinit private var device: UiDevice
 
-    @Before fun startMainActivityFromHomeScreen() {
+    @Before
+    fun startMainActivityFromHomeScreen() {
         // Initialize UiDevice instance
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
@@ -61,15 +66,74 @@ class StuffTest {
         device.wait(Until.hasObject(By.pkg(BASIC_SAMPLE_PACKAGE).depth(0)), LAUNCH_TIMEOUT.toLong())
     }
 
-    @Test fun checksPreconditions() {
+    @Ignore
+    @Test
+    fun checksComposing() {
+        assertThat(device, notNullValue())
+        try {
+            val mapViewSelector = UiSelector().description("map view container")
+            val mapView = device.findObject(mapViewSelector)
+            val result = composing(mapView)
+            assertTrue(result)
+        } catch (e: UiObjectNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+    @Ignore
+    @Test
+    fun checksComposingFailFast() {
+        assertThat(device, notNullValue())
+        try {
+            val mapViewSelector = UiSelector().description("map view container")
+            val mapView = device.findObject(mapViewSelector)
+            val result = failFast(mapView)
+            assertTrue(result)
+        } catch (e: UiObjectNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+    @Ignore
+    @Test
+    fun checksDoStuff() {
+        assertThat(device, notNullValue())
+        try {
+            val mapViewSelector = UiSelector().description("map view container")
+            val mapView = device.findObject(mapViewSelector)
+            val result = doStuff(mapView)
+            assertTrue(result)
+        } catch (e: UiObjectNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+    @Ignore
+    @Test
+    fun checksDoubleTap() {
         assertThat(device, notNullValue())
         try {
             val mapViewSelector = UiSelector().description("map view container")
             val mapView = device.findObject(mapViewSelector)
             doubleTap(mapView)
-            val result = failFast(mapView)
-            assertEquals("", result)
-            //assertTrue(result)
+        } catch (e: UiObjectNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+    @Test
+    fun checksFoo() {
+        assertThat(device, notNullValue())
+        try {
+            val mapViewSelector = UiSelector().description("map view container")
+            val mapView = device.findObject(mapViewSelector)
+            val firstPointer = obtainFromZeroToOneHundredAndEightyCircleCoordinates(200,
+                    mapView.bounds.centerX(),
+                    mapView.bounds.centerY())
+            val secondPointer = obtainFromOneHundredAndEightyToZeroCircleCoordinates(200,
+                    mapView.bounds.centerX(),
+                    mapView.bounds.centerY())
+            composingWithPlus(mapView, listOf(firstPointer, secondPointer))
         } catch (e: UiObjectNotFoundException) {
             e.printStackTrace()
         }
@@ -86,45 +150,96 @@ class StuffTest {
         return resolveInfo.activityInfo.packageName
     }
 
+    private fun composing(element: UiObject): Boolean {
+        val actions = pinchOut(100, 50)
+                .swipeDown(30)
+                .swipeRight(30)
+                .pinchOut(100, 50)
+                .swipeUp(100)
+        return actions.validate(element).hasCompletedCorrectly()
+    }
+
+    private fun foo(element: UiObject): Boolean {
+        val actions = doubleClick() + pinchOut(100, 50) + pinchOut(100, 50)
+        return actions.validate(element).hasCompletedCorrectly()
+    }
+
+    private fun composingWithPlus(element: UiObject,
+                                  pointers: List<Array<MotionEvent.PointerCoords>>): Boolean {
+        val actions = pinchOut(75, 30) + swipeDown(30) + multiTouch(pointers)
+        return actions.validate(element).hasCompletedCorrectly()
+    }
+
+    private fun obtainFromZeroToOneHundredAndEightyCircleCoordinates(radius: Int, xc: Int, yc: Int): Array<MotionEvent.PointerCoords> {
+        // Variation angle
+        var theta = Math.toRadians(0.0)
+        // Initial point
+        var x = radius
+        var y = 0
+        val pointer = MutableList<MotionEvent.PointerCoords>(73, { _ -> MotionEvent.PointerCoords() }).toTypedArray()
+        var i = 0
+        // While angle less than 360 degrees
+        while (theta <= Math.PI) {
+            addPoint(x + xc, y + yc, i, pointer)
+            // Increase angle by 5 degrees
+            theta = theta + Math.toRadians(2.5)
+            // Obtain x and y parametric values
+            val xd = radius * Math.cos(theta)
+            x = Math.round(xd).toInt()
+            val yd = radius * Math.sin(theta)
+            y = yd.toInt()
+            i++
+        }
+        return pointer
+    }
+
+    private fun obtainFromOneHundredAndEightyToZeroCircleCoordinates(radius: Int, xc: Int, yc: Int): Array<MotionEvent.PointerCoords> {
+        // Variation angle
+        var theta = Math.toRadians(180.0)
+        // Initial point
+        var x = -radius
+        var y = 0
+        val pointer = MutableList<MotionEvent.PointerCoords>(73, { _ -> MotionEvent.PointerCoords() }).toTypedArray()
+        var i = 0
+        // While angle less than 360 degrees
+        while (theta <= 2 * Math.PI) {
+            addPoint(x + xc, y + yc, i, pointer)
+            // Increase angle by 5 degrees
+            theta = theta + Math.toRadians(2.5)
+            // Obtain x and y parametric values
+            val xd = radius * Math.cos(theta)
+            x = Math.round(xd).toInt()
+            val yd = radius * Math.sin(theta)
+            y = yd.toInt()
+            i++
+        }
+        return pointer
+    }
+
+    private fun addPoint(x: Int, y: Int, counter: Int, pointer: Array<MotionEvent.PointerCoords>) {
+        val point = MotionEvent.PointerCoords()
+        point.x = x.toFloat()
+        point.y = y.toFloat()
+        point.pressure = 1f
+        point.size = 1f
+        pointer[counter] = point
+    }
+
+    fun doubleClick() = click() + click()
+
     private fun failFast(element: UiObject): Boolean {
         val actions = pinchOut(100, 50).pinchOut(100, 50)
         return actions.failFast(element).hasCompletedCorrectly()
     }
 
-    // TODO RJ Question: How can I start with this action? Now I'm unable...
-    fun ActionDSL<Unit>.doubleClick() = click() + click()
-
-    // TODO RJ Question: How can I work with GesturesDSL directly? See samples.kt
-    // TODO RJ More examples including different ways to interact with GesturesDSL
-    private fun moreStuff(element: UiObject) {
-    }
-
     private fun doStuff(element: UiObject): Boolean {
-//        val actions = click() + click() + pinchOut(100, 50) + pinchOut(100, 50)
-        val actions = click().pinchOut(100, 50).doubleClick().pinchOut(100, 50)
-        // TODO RJ Question: Why isn't this working?
-//        val result: Validated<NonEmptyList<GestureError>, Boolean> = GesturesDSL.map(
-//                click(),
-//                click(),
-//                click(),
-//                pinchOut(100, 50),
-//                pinchOut(100, 50),
-//                { _ -> println("works!"); true }).validate(mapView)
-//        return result
-        return actions.validate(element).hasCompletedCorrectly()
-
-
-
-//        val res: Boolean = GesturesDSL.map {
-//            findObject(UiSelector().description("map view container"))
-//                    .pinchOutAndThen(100, 50)
-//                    .pinchOutAndThen(100, 50)
-//                    .pinchIn(100, 50)
-//        }.runUnsafe(device)
-//        return res
+        val result: Validated<NonEmptyList<GestureError>, Boolean> = GesturesDSL.map(
+                pinchOut(100, 50),
+                pinchOut(100, 50),
+                { _ -> println("works!"); true }).validate(element)
+        return result.hasCompletedCorrectly()
     }
 
-    // TODO Question: How can I include DoubleTap action into the DSL?
     private fun doubleTap(element: UiObject) {
         val configurator = Configurator.getInstance()
         configurator.actionAcknowledgmentTimeout = 40
@@ -137,5 +252,14 @@ class StuffTest {
         }
 
         configurator.actionAcknowledgmentTimeout = 3000
+    }
+
+    private fun moreStuff(element: UiObject) {
+        val result = GesturesDSL.map(click(), click(), withView { it.childCount }, { (a, b, c) -> c }).validate(element)
+        // Preserve the type information (abstracting from arity)
+        val otherResult = GesturesDSL.tupled(click(), click(), withView { it.childCount }).validate(element)
+        val res = GesturesDSL.product(click(), click()).validate(element)
+        val seq = listOf(click(), click(), click()).sequence().validate(element)
+        val trav = listOf(click(), click(), click()).traverse({ a -> a }).validate(element)
     }
 }
