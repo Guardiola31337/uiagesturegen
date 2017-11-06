@@ -100,7 +100,7 @@ fun loggingInterpreter(view: UiObject): FunctionK<GesturesDSLHK, EitherKindParti
         object : FunctionK<GesturesDSLHK, EitherKindPartial<GestureError>> {
             override fun <A> invoke(fa: GesturesDSLKind<A>): EitherKind<GestureError, A> {
                 println(fa)
-                return safeInterpreter(view) as EitherKind<GestureError, A>
+                return safeInterpreterEither(view) as EitherKind<GestureError, A>
             }
         }
 
